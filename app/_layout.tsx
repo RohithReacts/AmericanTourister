@@ -76,22 +76,26 @@ function RootLayoutNav() {
   );
 }
 
+import { GestureHandlerRootView } from "react-native-gesture-handler";
+
 export default function RootLayout() {
   useEffect(() => {
     SplashScreen.hideAsync(); // Kill native splash safely
   }, []);
 
   return (
-    <ThemeProvider>
-      <AuthProvider>
-        <AddressProvider>
-          <FavoritesProvider>
-            <CartProvider>
-              <RootLayoutNav />
-            </CartProvider>
-          </FavoritesProvider>
-        </AddressProvider>
-      </AuthProvider>
-    </ThemeProvider>
+    <GestureHandlerRootView style={{ flex: 1 }}>
+      <ThemeProvider>
+        <AuthProvider>
+          <AddressProvider>
+            <FavoritesProvider>
+              <CartProvider>
+                <RootLayoutNav />
+              </CartProvider>
+            </FavoritesProvider>
+          </AddressProvider>
+        </AuthProvider>
+      </ThemeProvider>
+    </GestureHandlerRootView>
   );
 }

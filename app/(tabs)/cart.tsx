@@ -23,6 +23,12 @@ export default function Cart() {
   const { user } = useAuth();
   const [refreshing, setRefreshing] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [deliveryMode, setDeliveryMode] = useState<"delivery" | "pickup">(
+    "pickup"
+  );
+
+  const STORE_ADDRESS =
+    "Vaishnavi Sales 6-7-66, Raganna Darwaza, Main Road, Hyderabad - Warangal Hwy, Brahmanawada, Hanamkonda, Telangana 506011. Ph: 8374200125";
 
   const onRefresh = () => {
     setRefreshing(true);
@@ -41,7 +47,12 @@ export default function Cart() {
       const { data, error } = await supabase.from("orders").insert([
         {
           user_id: user.id,
-          items: items,
+          items: items.map((i) => ({
+            ...i,
+            delivery_mode: deliveryMode,
+            pickup_location:
+              deliveryMode === "pickup" ? STORE_ADDRESS : undefined,
+          })),
           total_price: total,
           status: "pending",
         },
@@ -142,6 +153,20 @@ export default function Cart() {
           { backgroundColor: theme.card, borderTopColor: theme.border },
         ]}
       >
+        <View
+          style={[
+            styles.pickupInfo,
+            { backgroundColor: theme.inputBackground },
+          ]}
+        >
+          <Text style={[styles.pickupLabel, { color: theme.textSecondary }]}>
+            Pickup Location:
+          </Text>
+          <Text style={[styles.pickupAddress, { color: theme.text }]}>
+            {STORE_ADDRESS}
+          </Text>
+        </View>
+
         <View style={styles.row}>
           <Text style={[styles.totalLabel, { color: theme.text }]}>Total:</Text>
           <Text style={[styles.totalPrice, { color: theme.text }]}>
@@ -212,4 +237,29 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   checkoutText: { color: "#fff", fontSize: 18, fontWeight: "bold" },
+
+  // Toggle
+  toggleContainer: {
+    flexDirection: "row",
+    marginBottom: 16,
+    gap: 10,
+  },
+  toggleBtn: {
+    flex: 1,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    paddingVertical: 10,
+    borderRadius: 8,
+    gap: 6,
+  },
+  toggleText: { fontWeight: "600", fontSize: 14 },
+
+  pickupInfo: {
+    padding: 12,
+    borderRadius: 8,
+    marginBottom: 16,
+  },
+  pickupLabel: { fontSize: 12, marginBottom: 4 },
+  pickupAddress: { fontSize: 13, fontWeight: "600" },
 });

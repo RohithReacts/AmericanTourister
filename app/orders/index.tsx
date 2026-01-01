@@ -33,6 +33,8 @@ const STATUS_COLORS = {
   cancelled: "#EF4444", // Red
 };
 
+const PICKUP_LOCATION_COLOR = "#007AFF";
+
 export default function Orders() {
   const router = useRouter();
   const { theme, isDark } = useTheme();
@@ -155,6 +157,15 @@ export default function Orders() {
     </ScrollView>
   );
 
+  const getDeliveryMode = (order: Order) => {
+    // Check first item for delivery mode
+    return order.items?.[0]?.delivery_mode || "delivery";
+  };
+
+  const getPickupLocation = (order: Order) => {
+    return order.items?.[0]?.pickup_location;
+  };
+
   return (
     <View style={[styles.container, { backgroundColor: theme.background }]}>
       <Stack.Screen
@@ -194,8 +205,28 @@ export default function Orders() {
                     Order #{item.id.slice(0, 8)}
                   </Text>
                 </View>
-                {renderStatusBadge(item.status)}
+                <View style={{ flexDirection: "row", alignItems: "center" }}>
+                  {renderStatusBadge(item.status)}
+                </View>
               </View>
+
+              {getDeliveryMode(item) === "pickup" && (
+                <View
+                  style={[
+                    styles.pickupBadge,
+                    { backgroundColor: theme.inputBackground },
+                  ]}
+                >
+                  <Ionicons
+                    name="storefront-outline"
+                    size={14}
+                    color={PICKUP_LOCATION_COLOR}
+                  />
+                  <Text style={[styles.pickupText, { color: theme.text }]}>
+                    Pick Up at: {getPickupLocation(item)}
+                  </Text>
+                </View>
+              )}
 
               <View style={styles.divider} />
 
@@ -324,4 +355,14 @@ const styles = StyleSheet.create({
     marginRight: 8,
   },
   statusButtonText: { fontSize: 12, fontWeight: "600" },
+
+  pickupBadge: {
+    flexDirection: "row",
+    alignItems: "center",
+    padding: 8,
+    borderRadius: 8,
+    marginBottom: 8,
+    gap: 6,
+  },
+  pickupText: { fontSize: 13, fontWeight: "500" },
 });

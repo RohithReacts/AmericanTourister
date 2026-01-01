@@ -64,6 +64,21 @@ export default function OrderBill() {
       )
       .join("");
 
+    const deliveryMode = order.items[0]?.delivery_mode || "delivery";
+    const pickupLocation = order.items[0]?.pickup_location;
+
+    // Delivery/Pickup Section HTML
+    let deliveryInfoHtml = "";
+    if (deliveryMode === "pickup") {
+      deliveryInfoHtml = `
+        <div class="meta-group" style="margin-top: 20px;">
+          <h3>Delivery Method</h3>
+          <p>PICK UP IN STORE</p>
+          <p style="font-weight: normal; font-size: 12px; margin-top: 4px;">${pickupLocation}</p>
+        </div>
+      `;
+    }
+
     return `
       <html>
         <head>
@@ -100,6 +115,7 @@ export default function OrderBill() {
               <h3>Invoice Details</h3>
               <p>Order #${order.id.slice(0, 8)}</p>
               <p>${date}</p>
+              ${deliveryInfoHtml}
             </div>
           </div>
 
@@ -204,6 +220,21 @@ export default function OrderBill() {
               <Text style={[styles.metaValue, { color: theme.text }]}>
                 #{order.id.slice(0, 8)}
               </Text>
+
+              {/* Pickup Info in Header if applicable */}
+              {order.items[0]?.delivery_mode === "pickup" && (
+                <View style={{ marginTop: 10, alignItems: "flex-end" }}>
+                  <Text
+                    style={[styles.metaLabel, { color: theme.textSecondary }]}
+                  >
+                    METHOD
+                  </Text>
+                  <View style={styles.pickupBadge}>
+                    <Ionicons name="storefront" size={12} color="#fff" />
+                    <Text style={styles.pickupBadgeText}>PICK UP</Text>
+                  </View>
+                </View>
+              )}
             </View>
           </View>
 
@@ -338,4 +369,15 @@ const styles = StyleSheet.create({
   printBtn: { backgroundColor: "#333" },
   shareBtn: { backgroundColor: "#FF801F" },
   btnText: { color: "#fff", fontWeight: "bold", fontSize: 16 },
+
+  pickupBadge: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "#007AFF",
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 6,
+    gap: 4,
+  },
+  pickupBadgeText: { color: "#fff", fontSize: 10, fontWeight: "bold" },
 });
