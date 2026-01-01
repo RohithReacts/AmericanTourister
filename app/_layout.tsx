@@ -1,24 +1,56 @@
-import { DarkTheme, DefaultTheme, ThemeProvider } from '@react-navigation/native';
-import { Stack } from 'expo-router';
-import { StatusBar } from 'expo-status-bar';
-import 'react-native-reanimated';
+import { Stack } from "expo-router";
+import * as SplashScreen from "expo-splash-screen";
+import { useEffect } from "react";
 
-import { useColorScheme } from '@/hooks/use-color-scheme';
+SplashScreen.preventAutoHideAsync();
 
-export const unstable_settings = {
-  anchor: '(tabs)',
-};
+import { CartProvider } from "../context/CartContext";
 
-export default function RootLayout() {
-  const colorScheme = useColorScheme();
+import { AddressProvider } from "../context/AddressContext";
+import { FavoritesProvider } from "../context/FavoritesContext";
+import { ThemeProvider, useTheme } from "../context/ThemeContext";
+
+import { StatusBar } from "expo-status-bar";
+
+function RootLayoutNav() {
+  const { theme, isDark } = useTheme();
 
   return (
-    <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
-      <Stack>
-        <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-        <Stack.Screen name="modal" options={{ presentation: 'modal', title: 'Modal' }} />
+    <>
+      <StatusBar style={isDark ? "light" : "dark"} />
+      <Stack
+        screenOptions={{
+          headerShown: false,
+          contentStyle: { backgroundColor: theme.background },
+        }}
+      >
+        <Stack.Screen name="welcome" />
+        <Stack.Screen name="(tabs)" />
+        <Stack.Screen name="product/[id]" />
+        <Stack.Screen name="favorites" options={{ headerTitle: "Favorites" }} />
+        <Stack.Screen
+          name="addresses"
+          options={{ headerTitle: "My Addresses" }}
+        />
       </Stack>
-      <StatusBar style="auto" />
+    </>
+  );
+}
+
+export default function RootLayout() {
+  useEffect(() => {
+    SplashScreen.hideAsync(); // Kill native splash safely
+  }, []);
+
+  return (
+    <ThemeProvider>
+      <AddressProvider>
+        <FavoritesProvider>
+          <CartProvider>
+            <RootLayoutNav />
+          </CartProvider>
+        </FavoritesProvider>
+      </AddressProvider>
     </ThemeProvider>
   );
 }
