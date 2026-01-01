@@ -12,16 +12,29 @@ import {
 import { SafeAreaView } from "react-native-safe-area-context";
 
 import { useState } from "react";
+import { useAuth } from "../../context/AuthContext";
 import { useTheme } from "../../context/ThemeContext";
 
 export default function Profile() {
   const router = useRouter();
   const { isDark, toggleTheme, theme } = useTheme();
+  const { user, signOut } = useAuth();
   const [refreshing, setRefreshing] = useState(false);
 
   const onRefresh = () => {
     setRefreshing(true);
-    setTimeout(() => setRefreshing(false), 2000);
+    // In a real app, you might re-fetch user data here if needed,
+    // but auth state is usually reactive.
+    setTimeout(() => setRefreshing(false), 1000);
+  };
+
+  const handleSignOut = async () => {
+    try {
+      await signOut();
+      // Router redirection is handled in _layout.tsx
+    } catch (error) {
+      console.error("Error signing out:", error);
+    }
   };
 
   const SectionTitle = ({ title }: { title: string }) => (
@@ -83,14 +96,16 @@ export default function Profile() {
         <View style={[styles.header, { backgroundColor: theme.card }]}>
           <View>
             <Text style={[styles.userName, { color: theme.text }]}>
-              ROHITH KUMAR
+              {user?.user_metadata?.full_name || "New User"}
             </Text>
             <View style={styles.row}>
-              <Text style={styles.userPhone}>+91-9876543210</Text>
+              <Text style={styles.userPhone}>
+                {user?.user_metadata?.phone || "No phone added"}
+              </Text>
               <Text style={styles.dot}>•</Text>
-              <Text style={styles.userEmail}>rohith@example.com</Text>
+              <Text style={styles.userEmail}>{user?.email}</Text>
             </View>
-            <TouchableOpacity>
+            <TouchableOpacity onPress={() => router.push("/profile/edit")}>
               <Text style={styles.editProfile}>Edit Profile</Text>
             </TouchableOpacity>
           </View>
@@ -198,6 +213,7 @@ export default function Profile() {
             styles.logoutBtn,
             { backgroundColor: theme.card, borderColor: theme.primary },
           ]}
+          onPress={handleSignOut}
         >
           <Text style={styles.logoutText}>LOGOUT</Text>
         </TouchableOpacity>
