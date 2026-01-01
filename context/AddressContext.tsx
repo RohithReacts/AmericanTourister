@@ -33,6 +33,7 @@ export const useAddress = () => useContext(AddressContext);
 
 export function AddressProvider({ children }: { children: ReactNode }) {
   const [addresses, setAddresses] = useState<Address[]>([]);
+  const [loaded, setLoaded] = useState(false);
 
   // Load from Storage
   useEffect(() => {
@@ -47,12 +48,15 @@ export function AddressProvider({ children }: { children: ReactNode }) {
         }
       } catch (e) {
         console.error("Failed to load addresses", e);
+      } finally {
+        setLoaded(true);
       }
     })();
   }, []);
 
   // Save to Storage
   useEffect(() => {
+    if (!loaded) return;
     const save = async () => {
       try {
         await AsyncStorage.setItem("@addresses", JSON.stringify(addresses));
@@ -61,7 +65,7 @@ export function AddressProvider({ children }: { children: ReactNode }) {
       }
     };
     save();
-  }, [addresses]);
+  }, [addresses, loaded]);
 
   const addAddress = (address: Omit<Address, "id">) => {
     const newAddress = { ...address, id: Date.now().toString() };

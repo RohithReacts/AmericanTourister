@@ -60,7 +60,7 @@ export default function AddressesScreen() {
           <Ionicons name="arrow-back" size={24} color={theme.icon} />
         </TouchableOpacity>
         <Text style={[styles.headerTitle, { color: theme.text }]}>
-          My Addresses
+          My Address
         </Text>
         <TouchableOpacity onPress={() => setModalVisible(true)}>
           <Ionicons name="add" size={28} color={theme.primary} />

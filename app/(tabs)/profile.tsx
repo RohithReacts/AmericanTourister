@@ -122,6 +122,7 @@ export default function Profile() {
               icon="bag-check-outline"
               label="Orders"
               desc="See your past orders and status"
+              onPress={() => router.push("/orders")}
             />
             <MenuItem
               icon="heart-outline"
@@ -131,7 +132,7 @@ export default function Profile() {
             />
             <MenuItem
               icon="location-outline"
-              label="Addresses"
+              label="Address"
               desc="Manage your delivery addresses"
               onPress={() => router.push("/addresses")}
               isLast

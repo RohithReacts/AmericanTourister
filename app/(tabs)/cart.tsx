@@ -1,6 +1,8 @@
 import { Ionicons } from "@expo/vector-icons";
+import { router } from "expo-router";
 import { useState } from "react";
 import {
+  ActivityIndicator,
   FlatList,
   Image,
   RefreshControl,
@@ -10,17 +12,51 @@ import {
   View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { useAuth } from "../../context/AuthContext";
 import { useCart } from "../../context/CartContext";
 import { useTheme } from "../../context/ThemeContext";
+import { supabase } from "../../lib/supabase";
 
 export default function Cart() {
-  const { items, removeFromCart, updateQuantity, total } = useCart();
+  const { items, removeFromCart, updateQuantity, clearCart, total } = useCart();
   const { theme, isDark } = useTheme();
+  const { user } = useAuth();
   const [refreshing, setRefreshing] = useState(false);
+  const [loading, setLoading] = useState(false);
 
   const onRefresh = () => {
     setRefreshing(true);
     setTimeout(() => setRefreshing(false), 2000);
+  };
+
+  const handleCheckout = async () => {
+    if (loading) return;
+    if (!user) {
+      router.push("/auth/sign-in");
+      return;
+    }
+
+    setLoading(true);
+    try {
+      const { data, error } = await supabase.from("orders").insert([
+        {
+          user_id: user.id,
+          items: items,
+          total_price: total,
+          status: "pending",
+        },
+      ]);
+
+      if (error) throw error;
+
+      clearCart();
+      router.push("/orders");
+    } catch (error: any) {
+      console.error("Checkout Error:", error);
+      alert("Checkout failed: " + (error.message || "Unknown error"));
+    } finally {
+      setLoading(false);
+    }
   };
 
   if (items.length === 0) {
@@ -113,8 +149,16 @@ export default function Cart() {
           </Text>
         </View>
 
-        <TouchableOpacity style={styles.checkoutBtn}>
-          <Text style={styles.checkoutText}>Checkout</Text>
+        <TouchableOpacity
+          style={[styles.checkoutBtn, loading && { opacity: 0.7 }]}
+          onPress={handleCheckout}
+          disabled={loading}
+        >
+          {loading ? (
+            <ActivityIndicator color="#fff" />
+          ) : (
+            <Text style={styles.checkoutText}>Checkout</Text>
+          )}
         </TouchableOpacity>
       </View>
     </SafeAreaView>

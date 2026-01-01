@@ -54,6 +54,14 @@ function RootLayoutNav() {
           name="profile/edit"
           options={{ headerTitle: "Edit Profile" }}
         />
+        <Stack.Screen
+          name="orders/index"
+          options={{ headerTitle: "My Orders" }}
+        />
+        <Stack.Screen
+          name="orders/bill"
+          options={{ headerTitle: "Tax Invoice" }}
+        />
         <Stack.Screen name="product/[id]" />
         <Stack.Screen
           name="favorites"
@@ -61,7 +69,7 @@ function RootLayoutNav() {
         />
         <Stack.Screen
           name="addresses"
-          options={{ headerTitle: "My Addresses", headerShown: true }}
+          options={{ headerTitle: "My Address", headerShown: false }}
         />
       </Stack>
     </>
