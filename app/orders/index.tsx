@@ -6,6 +6,7 @@ import {
   ActivityIndicator,
   Alert,
   FlatList,
+  Modal,
   ScrollView,
   StyleSheet,
   Text,
@@ -41,6 +42,8 @@ export default function Orders() {
   const { user } = useAuth();
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
+  const [deleteModalVisible, setDeleteModalVisible] = useState(false);
+  const [orderToDelete, setOrderToDelete] = useState<string | null>(null);
 
   // Simple admin check: In a real app, check user role or metadata
   // For demo: We'll assume any user with "admin" in their email is an admin
@@ -90,6 +93,31 @@ export default function Orders() {
           o.id === orderId ? { ...o, status: newStatus as any } : o
         )
       );
+    }
+  }
+
+  async function deleteOrder(orderId: string) {
+    setOrderToDelete(orderId);
+    setDeleteModalVisible(true);
+  }
+
+  async function confirmDelete() {
+    if (!orderToDelete) return;
+
+    setLoading(true); // Optional: show loading while deleting
+    const { error } = await supabase
+      .from("orders")
+      .delete()
+      .eq("id", orderToDelete);
+
+    setLoading(false);
+    setDeleteModalVisible(false);
+    setOrderToDelete(null);
+
+    if (error) {
+      Alert.alert("Error", "Could not delete order");
+    } else {
+      setOrders((prev) => prev.filter((o) => o.id !== orderToDelete));
     }
   }
 
@@ -184,10 +212,38 @@ export default function Orders() {
         </View>
       ) : orders.length === 0 ? (
         <View style={styles.center}>
-          <Ionicons name="receipt-outline" size={80} color={theme.icon} />
-          <Text style={[styles.emptyText, { color: theme.textSecondary }]}>
-            No orders found
+          <Ionicons
+            name="cart-outline"
+            size={100}
+            color={theme.icon}
+            style={{ marginBottom: 16, opacity: 0.5 }}
+          />
+          <Text
+            style={[
+              styles.emptyText,
+              { color: theme.text, fontWeight: "bold", fontSize: 18 },
+            ]}
+          >
+            No orders yet
           </Text>
+          <Text
+            style={{
+              color: theme.textSecondary,
+              textAlign: "center",
+              marginTop: 8,
+              marginBottom: 24,
+              paddingHorizontal: 40,
+            }}
+          >
+            Looks like you haven't placed any orders yet. Start shopping to see
+            them here!
+          </Text>
+          <TouchableOpacity
+            style={[styles.primaryBtn, { backgroundColor: theme.primary }]}
+            onPress={() => router.push("/")}
+          >
+            <Text style={styles.primaryBtnText}>Start Shopping</Text>
+          </TouchableOpacity>
         </View>
       ) : (
         <FlatList
@@ -267,6 +323,21 @@ export default function Orders() {
                 </Text>
               </TouchableOpacity>
 
+              <TouchableOpacity
+                style={[
+                  styles.deleteBtn,
+                  {
+                    borderColor: theme.border,
+                  },
+                ]}
+                onPress={() => deleteOrder(item.id)}
+              >
+                <Ionicons name="trash-outline" size={16} color="#EF4444" />
+                <Text style={[styles.deleteBtnText, { color: "#EF4444" }]}>
+                  Delete Order
+                </Text>
+              </TouchableOpacity>
+
               {isAdmin && (
                 <View style={styles.adminSection}>
                   <Text
@@ -281,6 +352,44 @@ export default function Orders() {
           )}
         />
       )}
+
+      {/* Delete Confirmation Modal */}
+      <Modal
+        visible={deleteModalVisible}
+        transparent
+        animationType="fade"
+        onRequestClose={() => setDeleteModalVisible(false)}
+      >
+        <View style={styles.modalOverlay}>
+          <View style={[styles.modalContent, { backgroundColor: theme.card }]}>
+            <View style={styles.modalIconBox}>
+              <Ionicons name="trash-outline" size={32} color="#EF4444" />
+            </View>
+            <Text style={[styles.modalTitle, { color: theme.text }]}>
+              Delete Order?
+            </Text>
+            <Text style={[styles.modalDesc, { color: theme.textSecondary }]}>
+              Are you sure you want to remove this order from your history? This
+              action cannot be undone.
+            </Text>
+
+            <View style={styles.modalActions}>
+              <TouchableOpacity
+                style={[styles.modalBtn, styles.modalBtnCancel]}
+                onPress={() => setDeleteModalVisible(false)}
+              >
+                <Text style={styles.modalBtnTextCancel}>Cancel</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={[styles.modalBtn, styles.modalBtnConfirm]}
+                onPress={confirmDelete}
+              >
+                <Text style={styles.modalBtnTextConfirm}>Delete</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      </Modal>
     </View>
   );
 }
@@ -338,6 +447,100 @@ const styles = StyleSheet.create({
   },
   billBtnText: { fontSize: 14, fontWeight: "600" },
 
+  deleteBtn: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    padding: 10,
+    borderRadius: 8,
+    borderWidth: 1,
+    marginTop: 8,
+    gap: 6,
+    borderColor: "#EF4444", // Fallback
+  },
+  deleteBtnText: { fontSize: 14, fontWeight: "600" },
+
+  primaryBtn: {
+    paddingVertical: 12,
+    paddingHorizontal: 24,
+    borderRadius: 8,
+    backgroundColor: "#FF801F", // Fallback
+  },
+  primaryBtnText: {
+    color: "#fff",
+    fontSize: 16,
+    fontWeight: "bold",
+  },
+
+  // Modal Styles
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: "rgba(0,0,0,0.5)",
+    justifyContent: "center",
+    alignItems: "center",
+    padding: 20,
+  },
+  modalContent: {
+    width: "100%",
+    maxWidth: 340,
+    padding: 24,
+    borderRadius: 24,
+    alignItems: "center",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.25,
+    shadowRadius: 10,
+    elevation: 10,
+  },
+  modalIconBox: {
+    width: 64,
+    height: 64,
+    borderRadius: 32,
+    backgroundColor: "#FEE2E2",
+    justifyContent: "center",
+    alignItems: "center",
+    marginBottom: 16,
+  },
+  modalTitle: {
+    fontSize: 20,
+    fontWeight: "800",
+    marginBottom: 8,
+    textAlign: "center",
+  },
+  modalDesc: {
+    fontSize: 15,
+    textAlign: "center",
+    marginBottom: 24,
+    lineHeight: 22,
+  },
+  modalActions: {
+    flexDirection: "row",
+    gap: 12,
+    width: "100%",
+  },
+  modalBtn: {
+    flex: 1,
+    paddingVertical: 14,
+    borderRadius: 12,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  modalBtnCancel: {
+    backgroundColor: "#F3F4F6",
+  },
+  modalBtnConfirm: {
+    backgroundColor: "#EF4444",
+  },
+  modalBtnTextCancel: {
+    fontSize: 16,
+    fontWeight: "600",
+    color: "#4B5563",
+  },
+  modalBtnTextConfirm: {
+    fontSize: 16,
+    fontWeight: "600",
+    color: "#fff",
+  },
   // Admin Styles
   adminSection: {
     marginTop: 16,

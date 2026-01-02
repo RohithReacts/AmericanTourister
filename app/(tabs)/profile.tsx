@@ -4,7 +4,6 @@ import {
   RefreshControl,
   ScrollView,
   StyleSheet,
-  Switch,
   Text,
   TouchableOpacity,
   View,
@@ -17,7 +16,7 @@ import { useTheme } from "../../context/ThemeContext";
 
 export default function Profile() {
   const router = useRouter();
-  const { isDark, toggleTheme, theme } = useTheme();
+  const { theme } = useTheme();
   const { user, signOut } = useAuth();
   const [refreshing, setRefreshing] = useState(false);
 
@@ -140,74 +139,6 @@ export default function Profile() {
           </View>
         </View>
 
-        {/* SECTION 2: PAYMENTS */}
-        <View style={styles.section}>
-          <SectionTitle title="PAYMENTS & REFUNDS" />
-          <View style={[styles.card, { backgroundColor: theme.card }]}>
-            <MenuItem
-              icon="card-outline"
-              label="Payment Methods"
-              desc="Manage cards and UPI"
-            />
-            <MenuItem
-              icon="wallet-outline"
-              label="Refund Status"
-              desc="Check status of your refunds"
-              isLast
-            />
-          </View>
-        </View>
-
-        {/* SECTION 3: MORE */}
-        <View style={styles.section}>
-          <SectionTitle title="MORE" />
-          <View style={[styles.card, { backgroundColor: theme.card }]}>
-            <View
-              style={[
-                styles.menuItem,
-                { borderBottomColor: theme.border, borderBottomWidth: 1 },
-              ]}
-            >
-              <View
-                style={[
-                  styles.iconBox,
-                  { backgroundColor: isDark ? "#333" : "#F5F6F8" },
-                ]}
-              >
-                <Ionicons
-                  name="moon-outline"
-                  size={20}
-                  color={isDark ? "#fff" : "#555"}
-                />
-              </View>
-              <View
-                style={[
-                  styles.menuContent,
-                  {
-                    flexDirection: "row",
-                    justifyContent: "space-between",
-                    alignItems: "center",
-                    paddingRight: 10,
-                  },
-                ]}
-              >
-                <Text style={[styles.menuLabel, { color: theme.text }]}>
-                  Dark Mode
-                </Text>
-                <Switch
-                  value={isDark}
-                  onValueChange={toggleTheme}
-                  trackColor={{ false: "#eee", true: "#FF801F" }}
-                  thumbColor={"#fff"}
-                />
-              </View>
-            </View>
-
-            <MenuItem icon="help-circle-outline" label="Help & Support" />
-            <MenuItem icon="settings-outline" label="Settings" isLast />
-          </View>
-        </View>
-
         {/* LOGOUT */}
         <TouchableOpacity
           style={[
@@ -219,7 +150,7 @@ export default function Profile() {
           <Text style={styles.logoutText}>LOGOUT</Text>
         </TouchableOpacity>
 
-        <Text style={styles.version}>App Version 1.0.0</Text>
+        <Text style={styles.version}>RohithReacts.dev</Text>
       </ScrollView>
     </SafeAreaView>
   );
