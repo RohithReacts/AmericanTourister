@@ -157,18 +157,6 @@ export const HOME_PRODUCTS = [
   },
   {
     id: "14",
-    name: "Trento",
-    image: require("../../assets/products/trento.webp"),
-    size: "60 cm",
-    mrp: 8100,
-    price: 6075,
-    offer: "25% OFF",
-    category: "Hard Luggage",
-    description:
-      "Meet Trento—designed to make every journey smoother. Featuring book-opening technology for easy packing, Shock Lock Wheels for smooth, stable movement, and an expander for extra space when needed. Built with high-grade polycarbonate, it’s lightweight yet durable. Available in quirky colors like Matcha, Elemental Blue, and Classic Black, Trento adds personality to your travel. Whether you're exploring new cities or taking quick getaways, Trento ensures your luggage is as functional as it is stylish Travel smarter. Travel with Trento.",
-  },
-  {
-    id: "15",
     name: "Skiddle",
     image: require("../../assets/products/kid.webp"),
     size: "40 cm",
@@ -180,7 +168,7 @@ export const HOME_PRODUCTS = [
       "The American Tourister Skiddle 39.5cm Small Suitcase is designed especially for kids, combining fun, functionality, and security in a compact size. Crafted with a durable hardside shell, this suitcase features playful and unique designs that appeal to both boys and girls, making travel exciting. The 2-point lock system ensures added security, keeping belongings safe while on the go. Designed for effortless maneuverability, the suitcase is equipped with smooth double wheels that glide easily across various surfaces, making it easy for kids to handle. Its compact size is perfect for short trips, school excursions, or family vacations. Backed by a 3-year international warranty, the Skiddle suitcase ensures long-lasting durability and reliability, giving parents peace of mind while kids enjoy their travel adventures.",
   },
   {
-    id: "16",
+    id: "15",
     name: "Sumurfs",
     image: require("../../assets/products/kid1.webp"),
     size: "53 cm",
@@ -192,7 +180,7 @@ export const HOME_PRODUCTS = [
       "Let your child travel in style with the American Tourister x The Smurfs 53cm Kids Luggage, a playful and practical suitcase inspired by the beloved Smurfs characters. Designed especially for young globetrotters, this fun-sized hardside luggage features vibrant Smurfs-themed graphics, making every trip feel like an adventure. The durable and lightweight build ensures easy handling for kids, while the 53cm cabin-friendly size is perfect for vacations, school trips, or family getaways. With smooth-rolling wheels, a comfortable top handle, and a secure closure system, it’s made for convenience. Backed by a 3-year international warranty, this licensed collaboration adds a splash of imagination to every journey.",
   },
   {
-    id: "17",
+    id: "16",
     name: "Kiztopia",
     image: require("../../assets/products/kid2.webp"),
     size: "53 cm",
@@ -204,7 +192,7 @@ export const HOME_PRODUCTS = [
       "The American Tourister KIZTOPIA is a fun and functional backpack designed for little explorers aged 2-4. Featuring a playful character design, it sparks imaginations. Equipped with ergonomic shoulder straps, a sternum strap, and back support, it ensures all-day comfort. Two spacious compartments and a convenient bottle pocket provide ample space for toys, snacks, and essentials. The 10-liter capacity is perfect for small adventures. Made with durable materials, this backpack is built to withstand energetic play",
   },
   {
-    id: "18",
+    id: "17",
     name: "Splash",
     image: require("../../assets/products/splash.webp"),
     size: "55 cm",

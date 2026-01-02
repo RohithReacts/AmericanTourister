@@ -1,7 +1,6 @@
 import { useTheme } from "@/context/ThemeContext";
 import { Ionicons } from "@expo/vector-icons";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import * as Location from "expo-location";
 import { useEffect, useState } from "react";
 import {
   Modal,
@@ -20,6 +19,8 @@ const DEFAULT_LOCATIONS = [
   { type: "Office", icon: "business", address: "" },
 ];
 
+import LocationMap from "./LocationMap";
+
 export default function LocationHeader() {
   const { theme, isDark } = useTheme();
 
@@ -33,9 +34,13 @@ export default function LocationHeader() {
     "Home"
   );
 
+  // New state for Map
+  const [showMap, setShowMap] = useState(false);
+  const [mapMode, setMapMode] = useState<"current" | "new">("current");
+
   useEffect(() => {
     loadSaved();
-    detectLocation("Home");
+    // detectLocation("Home"); // Optional: auto-detect on load or trust saved
   }, []);
 
   const loadSaved = async () => {
@@ -54,21 +59,27 @@ export default function LocationHeader() {
     await AsyncStorage.setItem("SELECTED_LOCATION", JSON.stringify(selected));
   };
 
-  const detectLocation = async (type: any) => {
-    const { status } = await Location.requestForegroundPermissionsAsync();
-    if (status !== "granted") return;
-    const loc = await Location.getCurrentPositionAsync({});
-    const place = await Location.reverseGeocodeAsync(loc.coords);
-    if (place.length) {
-      const p = place[0];
-      const auto = `${p.city}, ${p.region}`;
+  const handleMapConfirm = (loc: {
+    address: string;
+    latitude: number;
+    longitude: number;
+  }) => {
+    if (mapMode === "current") {
+      const type = "Current Location";
       const updated = locations.map((l) =>
-        l.type === type ? { ...l, address: auto } : l
+        l.type === "Home" ? { ...l, address: loc.address } : l
       );
       setLocations(updated);
       setLabel(type);
-      setAddress(auto);
-      saveAll(updated, { type, address: auto });
+      setAddress(loc.address);
+      saveAll(updated, { type, address: loc.address });
+      setShowMap(false);
+      setOpen(false);
+    } else {
+      // Adding new address
+      setInput(loc.address);
+      setShowMap(false);
+      // User still needs to select Type and click Save in the sheet
     }
   };
 
@@ -104,8 +115,21 @@ export default function LocationHeader() {
         </TouchableOpacity>
       </View>
 
+      {/* MAP MODAL */}
+      <Modal visible={showMap} animationType="slide" statusBarTranslucent>
+        <LocationMap
+          onConfirm={handleMapConfirm}
+          onCancel={() => setShowMap(false)}
+        />
+      </Modal>
+
       {/* MODAL */}
-      <Modal visible={open} transparent animationType="slide">
+      <Modal
+        visible={open}
+        transparent
+        animationType="slide"
+        statusBarTranslucent
+      >
         <Pressable style={styles.overlay} onPress={() => setOpen(false)}>
           <Pressable onPress={() => {}}>
             <View style={[styles.sheet, { backgroundColor: theme.card }]}>
@@ -125,7 +149,10 @@ export default function LocationHeader() {
                     styles.topCard,
                     { backgroundColor: theme.inputBackground },
                   ]}
-                  onPress={() => detectLocation(label)}
+                  onPress={() => {
+                    setMapMode("current");
+                    setShowMap(true);
+                  }}
                 >
                   <Ionicons name="locate" size={22} color={theme.primary} />
                   <Text style={[styles.topText, { color: theme.text }]}>
@@ -138,7 +165,13 @@ export default function LocationHeader() {
                     styles.topCard,
                     { backgroundColor: theme.inputBackground },
                   ]}
-                  onPress={() => setAdding(!adding)}
+                  onPress={() => {
+                    setAdding(!adding);
+                    if (!adding) {
+                      // If opening add form, maybe offer map to pick address?
+                      // For now just toggle form. We can add a "Pick on Map" button inside form.
+                    }
+                  }}
                 >
                   <Ionicons name="add-circle" size={22} color={theme.primary} />
                   <Text style={[styles.topText, { color: theme.text }]}>
@@ -148,20 +181,44 @@ export default function LocationHeader() {
 
                 {adding && (
                   <>
-                    <TextInput
-                      placeholder="Enter full address"
-                      placeholderTextColor={theme.textSecondary}
-                      value={input}
-                      onChangeText={setInput}
-                      style={[
-                        styles.input,
-                        {
-                          color: theme.text,
-                          borderColor: theme.border,
+                    <View
+                      style={{
+                        flexDirection: "row",
+                        gap: 10,
+                        marginBottom: 10,
+                      }}
+                    >
+                      <TextInput
+                        placeholder="Enter full address"
+                        placeholderTextColor={theme.textSecondary}
+                        value={input}
+                        onChangeText={setInput}
+                        style={[
+                          styles.input,
+                          {
+                            flex: 1,
+                            color: theme.text,
+                            borderColor: theme.border,
+                            backgroundColor: theme.inputBackground,
+                            marginBottom: 0,
+                          },
+                        ]}
+                      />
+                      <TouchableOpacity
+                        style={{
+                          justifyContent: "center",
+                          padding: 10,
                           backgroundColor: theme.inputBackground,
-                        },
-                      ]}
-                    />
+                          borderRadius: 10,
+                        }}
+                        onPress={() => {
+                          setMapMode("new");
+                          setShowMap(true);
+                        }}
+                      >
+                        <Ionicons name="map" size={24} color={theme.primary} />
+                      </TouchableOpacity>
+                    </View>
 
                     <View style={styles.typeRow}>
                       {["Home", "Work", "Office", "Other"].map((t) => (

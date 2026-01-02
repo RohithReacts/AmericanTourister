@@ -60,6 +60,11 @@ export default function Cart() {
 
       if (error) throw error;
 
+      // Ask for permission just once here, so the app has permission for future realtime updates
+      // We do NOT schedule the fake updates anymore.
+      const { requestPermissions } = await import("../../utils/notifications");
+      await requestPermissions();
+
       clearCart();
       router.push("/orders");
     } catch (error: any) {
@@ -160,7 +165,7 @@ export default function Cart() {
           ]}
         >
           <Text style={[styles.pickupLabel, { color: theme.textSecondary }]}>
-            Pickup Location:
+            Store Pickup Location:
           </Text>
           <Text style={[styles.pickupAddress, { color: theme.text }]}>
             {STORE_ADDRESS}

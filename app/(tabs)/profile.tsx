@@ -1,16 +1,19 @@
 import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import {
+  Modal,
   RefreshControl,
   ScrollView,
   StyleSheet,
+  Switch,
   Text,
   TouchableOpacity,
   View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
-import { useState } from "react";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import { useEffect, useState } from "react";
 import { useAuth } from "../../context/AuthContext";
 import { useTheme } from "../../context/ThemeContext";
 
@@ -19,6 +22,32 @@ export default function Profile() {
   const { theme } = useTheme();
   const { user, signOut } = useAuth();
   const [refreshing, setRefreshing] = useState(false);
+  const [notificationsEnabled, setNotificationsEnabled] = useState(true);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+
+  useEffect(() => {
+    loadNotificationPreference();
+  }, []);
+
+  const loadNotificationPreference = async () => {
+    try {
+      const value = await AsyncStorage.getItem("order_notifications");
+      if (value !== null) {
+        setNotificationsEnabled(value === "true");
+      }
+    } catch (e) {
+      console.error("Failed to load notification preference");
+    }
+  };
+
+  const toggleNotifications = async (value: boolean) => {
+    setNotificationsEnabled(value);
+    try {
+      await AsyncStorage.setItem("order_notifications", String(value));
+    } catch (e) {
+      console.error("Failed to save notification preference");
+    }
+  };
 
   const onRefresh = () => {
     setRefreshing(true);
@@ -30,10 +59,13 @@ export default function Profile() {
   const handleSignOut = async () => {
     try {
       await signOut();
-      // Router redirection is handled in _layout.tsx
     } catch (error) {
       console.error("Error signing out:", error);
     }
+  };
+
+  const handleDeleteAccount = () => {
+    setShowDeleteModal(true);
   };
 
   const SectionTitle = ({ title }: { title: string }) => (
@@ -139,6 +171,51 @@ export default function Profile() {
           </View>
         </View>
 
+        {/* SECTION 2: SETTINGS */}
+        <View style={styles.section}>
+          <SectionTitle title="SETTINGS" />
+          <View style={[styles.card, { backgroundColor: theme.card }]}>
+            <View
+              style={[styles.menuItem, { borderBottomColor: theme.border }]}
+            >
+              <View
+                style={[
+                  styles.iconBox,
+                  { backgroundColor: theme.inputBackground },
+                ]}
+              >
+                <Ionicons
+                  name="notifications-outline"
+                  size={20}
+                  color={theme.icon}
+                />
+              </View>
+              <View style={[styles.menuContent, { marginRight: 10 }]}>
+                <Text style={[styles.menuLabel, { color: theme.text }]}>
+                  Order Updates
+                </Text>
+                <Text style={[styles.menuDesc, { color: theme.textSecondary }]}>
+                  Get notified when order status changes
+                </Text>
+              </View>
+              <Switch
+                value={notificationsEnabled}
+                onValueChange={toggleNotifications}
+                trackColor={{ false: "#767577", true: theme.primary }}
+                thumbColor={"#f4f3f4"}
+              />
+            </View>
+
+            <MenuItem
+              icon="trash-outline"
+              label="Delete Account"
+              desc="Permanently delete your account"
+              isLast
+              onPress={handleDeleteAccount}
+            />
+          </View>
+        </View>
+
         {/* LOGOUT */}
         <TouchableOpacity
           style={[
@@ -147,11 +224,63 @@ export default function Profile() {
           ]}
           onPress={handleSignOut}
         >
-          <Text style={styles.logoutText}>LOGOUT</Text>
+          <Text style={styles.logoutText}>LOG OUT</Text>
         </TouchableOpacity>
 
         <Text style={styles.version}>RohithReacts.dev</Text>
       </ScrollView>
+
+      {/* DELETE CONFIRMATION MODAL */}
+      <Modal
+        visible={showDeleteModal}
+        transparent
+        animationType="fade"
+        statusBarTranslucent
+      >
+        <View style={styles.modalOverlay}>
+          <View style={[styles.modalContent, { backgroundColor: theme.card }]}>
+            <View style={styles.warningIconBox}>
+              <Ionicons name="warning" size={32} color="#EF4444" />
+            </View>
+            <Text style={[styles.modalTitle, { color: theme.text }]}>
+              Delete Account?
+            </Text>
+            <Text style={styles.modalDesc}>
+              Are you sure you want to delete your account? This action cannot
+              be undone and you will lose all data.
+            </Text>
+
+            <View style={styles.modalActions}>
+              <TouchableOpacity
+                style={[
+                  styles.modalBtn,
+                  { backgroundColor: theme.inputBackground },
+                ]}
+                onPress={() => setShowDeleteModal(false)}
+              >
+                <Text style={[styles.modalBtnText, { color: theme.text }]}>
+                  Cancel
+                </Text>
+              </TouchableOpacity>
+
+              <TouchableOpacity
+                style={[styles.modalBtn, { backgroundColor: "#EF4444" }]}
+                onPress={async () => {
+                  setShowDeleteModal(false);
+                  // Adding a small delay for better UX before signout
+                  setTimeout(async () => {
+                    await handleSignOut();
+                  }, 300);
+                }}
+              >
+                <Text style={[styles.modalBtnText, { color: "#fff" }]}>
+                  Yes, Delete
+                </Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      </Modal>
     </SafeAreaView>
   );
 }
@@ -276,5 +405,57 @@ const styles = StyleSheet.create({
     fontSize: 12,
     marginTop: 20,
     marginBottom: 20,
+  },
+
+  // Modal Styles
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: "rgba(0,0,0,0.6)",
+    justifyContent: "center",
+    alignItems: "center",
+    padding: 24,
+  },
+  modalContent: {
+    width: "100%",
+    borderRadius: 24,
+    padding: 24,
+    alignItems: "center",
+  },
+  warningIconBox: {
+    width: 60,
+    height: 60,
+    borderRadius: 30,
+    backgroundColor: "#FEE2E2", // Light red
+    alignItems: "center",
+    justifyContent: "center",
+    marginBottom: 16,
+  },
+  modalTitle: {
+    fontSize: 20,
+    fontWeight: "800",
+    marginBottom: 8,
+  },
+  modalDesc: {
+    textAlign: "center",
+    color: "#666",
+    fontSize: 14,
+    lineHeight: 20,
+    marginBottom: 24,
+  },
+  modalActions: {
+    flexDirection: "row",
+    gap: 12,
+    width: "100%",
+  },
+  modalBtn: {
+    flex: 1,
+    paddingVertical: 14,
+    borderRadius: 12,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  modalBtnText: {
+    fontWeight: "700",
+    fontSize: 15,
   },
 });

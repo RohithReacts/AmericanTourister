@@ -14,7 +14,7 @@ export default function Welcome() {
         style={styles.logo}
       />
       <Text style={styles.title}>Welcome to Reacts</Text>
-      <Text style={styles.subtitle}>The best place to shop.</Text>
+      <Text style={styles.subtitle}>Order your luggage online and collect it from your nearest American Tourister store.</Text>
 
       <View style={styles.buttonContainer}>
         <Link href="/auth/sign-in" asChild>

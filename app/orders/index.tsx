@@ -21,7 +21,7 @@ type Order = {
   id: string;
   created_at: string;
   total_price: number;
-  status: "pending" | "confirmed" | "shipped" | "delivered" | "cancelled";
+  status: "pending" | "confirmed" | "delivered" | "cancelled";
   items: any[];
   user_id: string;
 };
@@ -29,7 +29,6 @@ type Order = {
 const STATUS_COLORS = {
   pending: "#FFA500", // Orange
   confirmed: "#007AFF", // Blue
-  shipped: "#9333EA", // Purple
   delivered: "#10B981", // Green
   cancelled: "#EF4444", // Red
 };
@@ -141,7 +140,7 @@ export default function Orders() {
           },
         ]}
       >
-        {status.toUpperCase()}
+        {status.replace(/_/g, " ").toUpperCase()}
       </Text>
     </View>
   );
@@ -178,7 +177,7 @@ export default function Orders() {
               },
             ]}
           >
-            {status}
+            {status.replace(/_/g, " ")}
           </Text>
         </TouchableOpacity>
       ))}

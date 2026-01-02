@@ -20,6 +20,12 @@ function RootLayoutNav() {
   const router = useRouter();
 
   useEffect(() => {
+    if (!loading) {
+      SplashScreen.hideAsync();
+    }
+  }, [loading]);
+
+  useEffect(() => {
     if (loading) return;
 
     const inAuthGroup = segments[0] === "auth";
@@ -78,22 +84,26 @@ function RootLayoutNav() {
 
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 
-export default function RootLayout() {
-  useEffect(() => {
-    SplashScreen.hideAsync(); // Kill native splash safely
-  }, []);
+import { OrderNotificationListener } from "../components/OrderNotificationListener";
+import { Toast } from "../components/Toast";
+import { ToastProvider } from "../context/ToastContext";
 
+export default function RootLayout() {
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
       <ThemeProvider>
         <AuthProvider>
-          <AddressProvider>
-            <FavoritesProvider>
-              <CartProvider>
-                <RootLayoutNav />
-              </CartProvider>
-            </FavoritesProvider>
-          </AddressProvider>
+          <ToastProvider>
+            <AddressProvider>
+              <FavoritesProvider>
+                <CartProvider>
+                  <OrderNotificationListener />
+                  <RootLayoutNav />
+                  <Toast />
+                </CartProvider>
+              </FavoritesProvider>
+            </AddressProvider>
+          </ToastProvider>
         </AuthProvider>
       </ThemeProvider>
     </GestureHandlerRootView>
