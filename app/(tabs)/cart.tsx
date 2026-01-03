@@ -60,10 +60,8 @@ export default function Cart() {
 
       if (error) throw error;
 
-      // Ask for permission just once here, so the app has permission for future realtime updates
-      // We do NOT schedule the fake updates anymore.
-      const { requestPermissions } = await import("../../utils/notifications");
-      await requestPermissions();
+      // In-app notifications are handled via context/Supabase subscriptions
+      // No native permission request needed here
 
       clearCart();
       router.push("/orders");

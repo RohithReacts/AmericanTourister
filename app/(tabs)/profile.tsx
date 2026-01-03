@@ -5,15 +5,13 @@ import {
   RefreshControl,
   ScrollView,
   StyleSheet,
-  Switch,
   Text,
   TouchableOpacity,
   View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
-import AsyncStorage from "@react-native-async-storage/async-storage";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useAuth } from "../../context/AuthContext";
 import { useTheme } from "../../context/ThemeContext";
 
@@ -22,32 +20,7 @@ export default function Profile() {
   const { theme } = useTheme();
   const { user, signOut } = useAuth();
   const [refreshing, setRefreshing] = useState(false);
-  const [notificationsEnabled, setNotificationsEnabled] = useState(true);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
-
-  useEffect(() => {
-    loadNotificationPreference();
-  }, []);
-
-  const loadNotificationPreference = async () => {
-    try {
-      const value = await AsyncStorage.getItem("order_notifications");
-      if (value !== null) {
-        setNotificationsEnabled(value === "true");
-      }
-    } catch (e) {
-      console.error("Failed to load notification preference");
-    }
-  };
-
-  const toggleNotifications = async (value: boolean) => {
-    setNotificationsEnabled(value);
-    try {
-      await AsyncStorage.setItem("order_notifications", String(value));
-    } catch (e) {
-      console.error("Failed to save notification preference");
-    }
-  };
 
   const onRefresh = () => {
     setRefreshing(true);
@@ -175,37 +148,6 @@ export default function Profile() {
         <View style={styles.section}>
           <SectionTitle title="SETTINGS" />
           <View style={[styles.card, { backgroundColor: theme.card }]}>
-            <View
-              style={[styles.menuItem, { borderBottomColor: theme.border }]}
-            >
-              <View
-                style={[
-                  styles.iconBox,
-                  { backgroundColor: theme.inputBackground },
-                ]}
-              >
-                <Ionicons
-                  name="notifications-outline"
-                  size={20}
-                  color={theme.icon}
-                />
-              </View>
-              <View style={[styles.menuContent, { marginRight: 10 }]}>
-                <Text style={[styles.menuLabel, { color: theme.text }]}>
-                  Order Updates
-                </Text>
-                <Text style={[styles.menuDesc, { color: theme.textSecondary }]}>
-                  Get notified when order status changes
-                </Text>
-              </View>
-              <Switch
-                value={notificationsEnabled}
-                onValueChange={toggleNotifications}
-                trackColor={{ false: "#767577", true: theme.primary }}
-                thumbColor={"#f4f3f4"}
-              />
-            </View>
-
             <MenuItem
               icon="trash-outline"
               label="Delete Account"
